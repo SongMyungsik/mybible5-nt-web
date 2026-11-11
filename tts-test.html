@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>음성 테스트</title>
+<style>
+  :root { --ink:#1b1340; --violet:#6B4EFF; --soft:#EFEAFF; --muted:#5b5675; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif;
+         background:#fff; color:var(--ink); }
+  h1 { font-size:20px; margin:0 0 4px; }
+  p { margin:6px 0; color:var(--muted); font-size:14px; line-height:1.5; }
+  .box { background:var(--soft); border-radius:12px; padding:12px; margin:12px 0; }
+  button { display:block; width:100%; margin:8px 0; padding:12px; border:0; border-radius:10px;
+           background:var(--violet); color:#fff; font-size:16px; text-align:left; }
+  button.alt { background:#2e7d32; }
+  button.stop { background:#c62828; text-align:center; }
+  code { font-size:13px; word-break:break-all; }
+  li { margin:4px 0; font-size:14px; }
+  .greek { font-weight:700; color:var(--violet); }
+</style>
+</head>
+<body>
+  <h1>헬라어 음성 테스트</h1>
+  <p>버전 표시: <b>tts-test v1</b></p>
+  <p>아래 버튼을 하나씩 눌러 보고, <b>어느 버튼이 "이우"처럼 한 단어로 읽는지</b> 알려 주세요.</p>
+
+  <div class="box">
+    <b>1. 아이폰이 웹에 제공하는 그리스어 음성</b>
+    <ul id="greek"><li>불러오는 중…</li></ul>
+    <p id="count"></p>
+  </div>
+
+  <div class="box">
+    <b>2. 읽기 테스트</b>
+    <div id="buttons"></div>
+    <button class="alt" id="langOnly">언어만 지정(el-GR)하고 읽기 — υιού</button>
+    <button class="alt" id="langOnlyPoly">언어만 지정(el-GR)하고 읽기 — υἱοῦ (원문 표기)</button>
+    <button class="alt" id="sentence">문장 읽기 — Βίβλος γενέσεως Ιησού Χριστού</button>
+    <button class="stop" id="stop">멈춤</button>
+  </div>
+
+<script>
+  const synth = window.speechSynthesis;
+  const WORD = 'υιού';
+  function speak(text, voice, lang) {
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if (lang) u.lang = lang;
+    if (voice) { u.voice = voice; u.lang = voice.lang; }
+    u.rate = 0.8;
+    synth.speak(u);
+  }
+  function render() {
+    const all = synth.getVoices();
+    const greek = all.filter(v => v.lang.toLowerCase().replace('_','-').startsWith('el'));
+    document.getElementById('count').textContent = '전체 음성 ' + all.length + '개 중 그리스어 ' + greek.length + '개';
+    const ul = document.getElementById('greek');
+    ul.innerHTML = greek.length ? '' : '<li>없음 — 웹 페이지에 그리스어 음성이 제공되지 않습니다.</li>';
+    const btns = document.getElementById('buttons');
+    btns.innerHTML = '';
+    greek.forEach((v, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = '<span class="greek">' + v.name + '</span> <code>' + v.lang + '</code>' +
+        (v.localService ? ' (기기 내장)' : ' (온라인)') + (v.default ? ' [기본]' : '');
+      ul.appendChild(li);
+      const b = document.createElement('button');
+      b.textContent = (i + 1) + '. ' + v.name + ' 음성으로 읽기 — ' + WORD;
+      b.onclick = () => speak(WORD, v);
+      btns.appendChild(b);
+    });
+  }
+  document.getElementById('langOnly').onclick = () => speak(WORD, null, 'el-GR');
+  document.getElementById('langOnlyPoly').onclick = () => speak('υἱοῦ', null, 'el-GR');
+  document.getElementById('sentence').onclick = () => {
+    const v = synth.getVoices().find(v => v.lang.toLowerCase().startsWith('el'));
+    speak('Βίβλος γενέσεως Ιησού Χριστού', v || null, 'el-GR');
+  };
+  document.getElementById('stop').onclick = () => synth.cancel();
+  render();
+  synth.onvoiceschanged = render;
+  setTimeout(render, 500);
+  setTimeout(render, 1500);
+</script>
+</body>
+</html>
