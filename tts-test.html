@@ -23,7 +23,7 @@
 </head>
 <body>
   <h1>헬라어 음성 테스트</h1>
-  <p>버전 표시: <b>tts-test v1</b></p>
+  <p>버전 표시: <b>tts-test v2</b></p>
   <p>아래 버튼을 하나씩 눌러 보고, <b>어느 버튼이 "이우"처럼 한 단어로 읽는지</b> 알려 주세요.</p>
 
   <div class="box">
@@ -38,6 +38,12 @@
     <button class="alt" id="langOnly">언어만 지정(el-GR)하고 읽기 — υιού</button>
     <button class="alt" id="langOnlyPoly">언어만 지정(el-GR)하고 읽기 — υἱοῦ (원문 표기)</button>
     <button class="alt" id="sentence">문장 읽기 — Βίβλος γενέσεως Ιησού Χριστού</button>
+    <p style="margin-top:14px"><b>3. 단어 하나를 다르게 넘겨 보기 (Melina)</b> — 어느 것이 "이우"로 읽히나요?</p>
+    <button id="v1">A. 마침표 붙이기 — "υιού."</button>
+    <button id="v2">B. 대문자로 시작 — "Υιού."</button>
+    <button id="v3">C. 두 번 반복 — "υιού, υιού."</button>
+    <button id="v4">D. 앞뒤 공백 — " υιού "</button>
+    <button id="v5">E. 다른 단어 — "Χριστού."</button>
     <button class="stop" id="stop">멈춤</button>
   </div>
 
@@ -77,6 +83,9 @@
     const v = synth.getVoices().find(v => v.lang.toLowerCase().startsWith('el'));
     speak('Βίβλος γενέσεως Ιησού Χριστού', v || null, 'el-GR');
   };
+  const mel = () => synth.getVoices().find(v => v.lang.toLowerCase().startsWith('el')) || null;
+  const map = {v1:'υιού.', v2:'Υιού.', v3:'υιού, υιού.', v4:' υιού ', v5:'Χριστού.'};
+  for (const id in map) document.getElementById(id).onclick = () => speak(map[id], mel(), 'el-GR');
   document.getElementById('stop').onclick = () => synth.cancel();
   render();
   synth.onvoiceschanged = render;
