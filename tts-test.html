@@ -23,7 +23,7 @@
 </head>
 <body>
   <h1>헬라어 음성 테스트</h1>
-  <p>버전 표시: <b>tts-test v3</b></p>
+  <p>버전 표시: <b>tts-test v4</b></p>
   <p>아래 버튼을 하나씩 눌러 보고, <b>어느 버튼이 "이우"처럼 한 단어로 읽는지</b> 알려 주세요.</p>
 
   <div class="box">
@@ -34,6 +34,7 @@
 
   <div class="box">
     <b>2. 읽기 테스트</b>
+    <button class="alt" id="english">0. 영어 확인 — "Hello, this is a test." (사파리 소리 자체가 나는지)</button>
     <div id="buttons"></div>
     <button class="alt" id="langOnly">언어만 지정(el-GR)하고 읽기 — υιού</button>
     <button class="alt" id="langOnlyPoly">언어만 지정(el-GR)하고 읽기 — υἱοῦ (원문 표기)</button>
@@ -80,11 +81,15 @@
         (v.localService ? ' (기기 내장)' : ' (온라인)') + (v.default ? ' [기본]' : '');
       ul.appendChild(li);
       const b = document.createElement('button');
-      b.textContent = (i + 1) + '. ' + v.name + ' 음성으로 읽기 — ' + WORD;
-      b.onclick = () => speak(WORD, v);
+      b.textContent = (i + 1) + '. ' + v.name + ' (' + (v.voiceURI || '').split('.').slice(-2).join('.') + ') 음성으로 문장 읽기';
+      b.onclick = () => speak('Βίβλος γενέσεως Ιησού Χριστού υιού Δαυίδ', v);
       btns.appendChild(b);
     });
   }
+  document.getElementById('english').onclick = () => {
+    const v = synth.getVoices().find(v => v.lang.toLowerCase().startsWith('en'));
+    speak('Hello, this is a test.', v || null, 'en-US');
+  };
   document.getElementById('langOnly').onclick = () => speak(WORD, null, 'el-GR');
   document.getElementById('langOnlyPoly').onclick = () => speak('υἱοῦ', null, 'el-GR');
   document.getElementById('sentence').onclick = () => {
